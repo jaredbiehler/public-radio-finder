@@ -21,7 +21,8 @@
     "secondary_frequency": 8,
     "secondary_band": 9,
     "secondary_strength": 10,
-    "secondary_program": 11
+    "secondary_program": 11,
+    "zip": 12
   },
   "resources": {
     "media": []

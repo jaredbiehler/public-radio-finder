@@ -12,6 +12,7 @@
 #define KEY_SECONDARY_BAND 9
 #define KEY_SECONDARY_STRENGTH 10
 #define KEY_SECONDARY_PROGRAM 11
+#define KEY_ZIP_CODE 12
 
 #ifndef NETWORK_LAYER_H
 #define NETWORK_LAYER_H
@@ -30,14 +31,15 @@ typedef struct {
   char primary_call[5];
   char primary_frequency[6];
   char primary_band[3] ;
-  int   primary_strength;
+  int  primary_strength;
   char primary_program[255];
-  bool  secondary_available;
+  bool secondary_available;
   char secondary_call[5];
   char secondary_frequency[6];
   char secondary_band[3];
-  int   secondary_strength;
+  int  secondary_strength;
   char secondary_program[255];
+  char zip_code[6];
   Error error;
 } NprData;
 

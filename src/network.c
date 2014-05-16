@@ -2,6 +2,7 @@
 #include "network.h"
 #include "npr.h"
 #include "debug.h"
+#include "persist.h"
 #include "main.h"
 
 const  int MAX_RETRY = 2;
@@ -9,6 +10,8 @@ static int retry_count = 0;
 
 static void appmsg_in_received(DictionaryIterator *received, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "In received.");
+
+  retry_count = 0;
 
   NprData *npr_data = (NprData*) context;
 
@@ -24,6 +27,8 @@ static void appmsg_in_received(DictionaryIterator *received, void *context) {
   Tuple *secondary_strength_tuple  = dict_find(received, KEY_SECONDARY_STRENGTH);
   Tuple *secondary_program_tuple   = dict_find(received, KEY_SECONDARY_PROGRAM);
 
+  Tuple *zip_code_tuple = dict_find(received, KEY_ZIP_CODE);
+
   Tuple *error_tuple    = dict_find(received, KEY_ERROR);
   Tuple *js_ready_tuple = dict_find(received, KEY_JS_READY);
 
@@ -38,29 +43,18 @@ static void appmsg_in_received(DictionaryIterator *received, void *context) {
     strncpy(npr_data->primary_band,  primary_band_tuple->value->cstring, 3);
     npr_data->primary_strength  = primary_strength_tuple->value->int32;
 
-    /*
-    npr_data->primary_call      = primary_call_tuple->value->cstring;
-    npr_data->primary_frequency = primary_frequency_tuple->value->cstring;
-    npr_data->primary_band      = primary_band_tuple->value->cstring;
-    */
-
     if (secondary_call_tuple) {
       npr_data->secondary_available = true;
       strncpy(npr_data->secondary_call,  secondary_call_tuple->value->cstring, 5);
       strncpy(npr_data->secondary_frequency,  secondary_frequency_tuple->value->cstring, 6);
       strncpy(npr_data->secondary_band,  secondary_band_tuple->value->cstring, 3);
       npr_data->secondary_strength  = secondary_strength_tuple->value->int32;
-      /*
-      npr_data->secondary_call      = secondary_call_tuple->value->cstring;
-      npr_data->secondary_frequency = secondary_frequency_tuple->value->cstring;
-      npr_data->secondary_band      = secondary_band_tuple->value->cstring;
-      */
     } else {
       npr_data->secondary_available = false;
     }
 
-    strncpy(npr_data->primary_program,  "", 255);
-    strncpy(npr_data->secondary_program,  "", 255);
+    strncpy(npr_data->primary_program, "", 255);
+    strncpy(npr_data->secondary_program, "", 255);
 
     npr_data->error       = ERROR_OK;
     npr_data->updated     = time(NULL);
@@ -69,12 +63,15 @@ static void appmsg_in_received(DictionaryIterator *received, void *context) {
   }
   // Separate update for program names
   else if (primary_program_tuple) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "IN: Pri Program Tuple.");
     strncpy(npr_data->primary_program,  primary_program_tuple->value->cstring, 255);
   }
   else if (secondary_program_tuple) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "IN: Sec Program Tuple.");
     strncpy(npr_data->secondary_program,  secondary_program_tuple->value->cstring, 255);
+  }
+  else if (zip_code_tuple) {
+    strncpy(npr_data->zip_code, zip_code_tuple->value->cstring, 6);
+    store_persisted_values(npr_data);
+    return;
   }
   // Initial Javascript Ready message
   else if (js_ready_tuple) {
@@ -94,9 +91,6 @@ static void appmsg_in_received(DictionaryIterator *received, void *context) {
   }
 
   npr_layer_update(npr_data);
-
-  // Succes! reset the retry count...
-  retry_count = 0;
 }
 
 static char *translate_error(AppMessageResult result) 
@@ -203,12 +197,7 @@ void request_npr(NprData *npr_data)
     return;
   }
 
-  /*
-  dict_write_cstring(iter, KEY_SERVICE, npr_data->service);
-  dict_write_cstring(iter, KEY_SCALE, npr_data->scale);
-  dict_write_uint8(iter, KEY_DEBUG, (uint8_t)npr_data->debug);
-  dict_write_uint8(iter, KEY_BATTERY, (uint8_t)npr_data->battery);
-  */
+  dict_write_cstring(iter, KEY_ZIP_CODE, npr_data->zip_code);
 
   dict_write_end(iter);
 

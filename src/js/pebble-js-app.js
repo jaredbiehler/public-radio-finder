@@ -5,11 +5,11 @@ var Global = {
   updateWaitTimeout: 2 * 60 * 1000, // two minutes in ms
   lastUpdateAttempt: new Date(),
   maxRetry:          3,
+  retryWait:         750,
   config:            {
-    zip: null
+    zip: ''
   }
 };
-
 
 var ack  = function () { console.log("Pebble ACK sendAppMessage");};
 var nack = function (data, retry) {
@@ -21,9 +21,11 @@ var nack = function (data, retry) {
   }
   console.warn("Pebble NACK sendAppMessage retryCount:"+retry+" data:"+JSON.stringify(data));
   if (data) {
-    Pebble.sendAppMessage(data, ack, function(e){
-      nack(data, retry);
-    });
+    setTimeout(function(){
+          Pebble.sendAppMessage(data, ack, function(e){
+            nack(data, retry);
+          });
+    }, Global.retryWait + Math.floor(Math.random() * Global.retryWait));
   }
 };
 
@@ -36,7 +38,7 @@ var updateNprData = function () {
   Global.updateInProgress  = true;
   Global.lastUpdateAttempt = new Date();
 
-  if (Global.config.zip !== null) {
+  if (Global.config.zip !== null && Global.config.zip.length > 0) {
     fetchNprDataViaZip();
   } else {
     var locationOptions = { "timeout": 15000, "maximumAge": 60000 };
@@ -292,7 +294,7 @@ Pebble.addEventListener("appmessage", function(data) {
   console.log("Got a message - Starting request ... " + JSON.stringify(data));
   try {
     if (typeof data.payload.zip !== "undefined"){
-      Global.latestConfig.zip = data.payload.zip;
+      Global.config.zip = data.payload.zip;
     }
     updateNprData();
   } catch (e) {
@@ -301,9 +303,7 @@ Pebble.addEventListener("appmessage", function(data) {
 });
 
 Pebble.addEventListener("showConfiguration", function (e) {
-  var options = {};
-
-  var url = Global.configurationUrl+'?'+serialize(options);
+  var url = Global.configurationUrl+'?'+serialize(Global.config);
   console.log('Configuration requested using url: '+url);
   Pebble.openURL(url);
 });
@@ -323,9 +323,14 @@ Pebble.addEventListener("webviewclosed", function(e) {
 
       if (typeof settings.zip !== "undefined") {
         Global.config.zip = settings.zip;
+      } else {
+        Global.config.zip = '';
       }
       
       console.log("Settings received: "+JSON.stringify(settings));
+      Pebble.sendAppMessage(Global.config, ack, function(){
+        nack(Global.config);
+      });
       updateNprData();
     } catch(ex) {
       console.warn("Unable to parse response from configuration:"+ex.message);

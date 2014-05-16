@@ -1,7 +1,7 @@
 #include <pebble.h>
 #include "main.h"
 #include "network.h"
-//#include "persist.h"
+#include "persist.h"
 #include "npr.h"
 #include "debug.h"
 #include "datetime.h"
@@ -77,7 +77,8 @@ static void init(void)
   npr_layer_create(NPR_FRAME, window);
   debug_layer_create(DEBUG_FRAME, window);
 
-  //load_persisted_values(npr_data);
+  load_persisted_values(npr_data);
+
   debug_update_message("Initializing...");
 
   // Kickoff our npr loading 'dot' animation
@@ -110,8 +111,6 @@ static void deinit(void)
   free(npr_data);
 
   close_network();
-
-  //store_persisted_values(npr_data);
 }
 
 int main(void) {
