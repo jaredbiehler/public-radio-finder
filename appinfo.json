@@ -2,14 +2,26 @@
   "uuid": "7b52d760-6799-4c37-8d7a-37d718e6abbc",
   "shortName": "npr-station-locator",
   "longName": "npr-station-locator",
-  "companyName": "MakeAwesomeHappen",
+  "companyName": "Jared Biehler",
   "versionCode": 1,
   "versionLabel": "1.0.0",
   "watchapp": {
-    "watchface": false
+    "watchface": true
   },
+  "capabilities": [ "configurable", "location" ],
   "appKeys": {
-    "dummy": 0
+    "error": 0,
+    "js_ready": 1,
+    "primary_call": 2,
+    "primary_frequency": 3,
+    "primary_band": 4,
+    "primary_strength": 5,
+    "primary_program": 6,
+    "secondary_call": 7,
+    "secondary_frequency": 8,
+    "secondary_band": 9,
+    "secondary_strength": 10,
+    "secondary_program": 11
   },
   "resources": {
     "media": []
