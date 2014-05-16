@@ -24,6 +24,10 @@ static void draw_signal_strength(GContext *ctx, int strength)
 {
   int width = 4; // pixels
   int bars = 5;
+
+  if (strength <= 0) {
+    return;
+  }
   
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_context_set_stroke_color(ctx, GColorWhite);
@@ -72,7 +76,7 @@ void npr_layer_create(GRect frame, Window *window)
   layer_set_update_proc(nld->primary_strength_layer, primary_strength_layer_update);
   layer_add_child(npr_layer, nld->primary_strength_layer);
 
-  nld->primary_program_layer = text_layer_create(GRect(0, 48, 144, 20));
+  nld->primary_program_layer = text_layer_create(GRect(0, 48, 144, 22));
   text_layer_set_text_color(nld->primary_program_layer, GColorWhite);
   text_layer_set_background_color(nld->primary_program_layer, GColorClear);
   text_layer_set_font(nld->primary_program_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
@@ -97,7 +101,7 @@ void npr_layer_create(GRect frame, Window *window)
   layer_set_update_proc(nld->secondary_strength_layer, secondary_strength_layer_update);
   layer_add_child(npr_layer, nld->secondary_strength_layer);
 
-  nld->secondary_program_layer = text_layer_create(GRect(0, 124, 144, 20));
+  nld->secondary_program_layer = text_layer_create(GRect(0, 124, 144, 22));
   text_layer_set_text_color(nld->secondary_program_layer, GColorWhite);
   text_layer_set_background_color(nld->secondary_program_layer, GColorClear);
   text_layer_set_font(nld->secondary_program_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
