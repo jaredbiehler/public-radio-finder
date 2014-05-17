@@ -6,18 +6,39 @@
 static Layer *npr_layer;
 
 const int NPR_ANIMATION_REFRESH = 1000; // 1 second animation 
-const int NPR_ANIMATION_TIMEOUT = 60; // 60 * NPR_ANIMATION_REFRESH = 60s
-const int NPR_STALE_TIMEOUT = 60 * 60 * 2; // 2 hours in seconds
-
 
 // Initial animation dots
 static AppTimer *npr_animation_timer;
 static bool animation_timer_enabled = true;
 static int  animation_step = 0;
 
+
+static void npr_animate_update(Layer *me, GContext *ctx) 
+{
+  int dots = 3; 
+  int spacer = 12;
+  
+  graphics_context_set_fill_color(ctx, GColorWhite);
+
+  for (int i=1; i<=dots; i++) {
+    if (i == animation_step) {
+      graphics_fill_circle(ctx, GPoint((i*spacer), 4), 4);
+    } else {
+      graphics_fill_circle(ctx, GPoint((i*spacer), 4), 2);
+    }
+  } 
+}
+
 void npr_animate(void *context)
 {
+  NprData *npr_data = (NprData*) context;
+  NprLayerData *nld = layer_get_data(npr_layer);
 
+  if (npr_data->updated == 0 && npr_data->error == ERROR_OK) {    
+    animation_step = (animation_step % 3) + 1;
+    layer_mark_dirty(nld->loading_layer);
+    npr_animation_timer = app_timer_register(NPR_ANIMATION_REFRESH, npr_animate, npr_data);
+  } 
 }
 
 static void draw_signal_strength(GContext *ctx, int strength)
@@ -57,6 +78,10 @@ void npr_layer_create(GRect frame, Window *window)
 {
   npr_layer = layer_create_with_data(frame, sizeof(NprLayerData));
   NprLayerData *nld = layer_get_data(npr_layer);
+
+  nld->loading_layer = layer_create(GRect(47, 60, 50, 20));
+  layer_set_update_proc(nld->loading_layer, npr_animate_update);
+  layer_add_child(npr_layer, nld->loading_layer);
 
   nld->primary_call_layer = text_layer_create(GRect(0, 0, 44, 20));
   text_layer_set_text_color(nld->primary_call_layer, GColorWhite);
@@ -120,17 +145,17 @@ void npr_layer_update(NprData *npr_data)
     return;
   }
 
+  NprLayerData *nld = layer_get_data(npr_layer);
+
   if (npr_animation_timer && animation_timer_enabled) {
     app_timer_cancel(npr_animation_timer);
     // this is only needed to stop the error message when cancelling an already cancelled timer... 
     animation_timer_enabled = false;
+    layer_set_hidden(nld->loading_layer, true);
   }
 
   time_t current_time = time(NULL);
   bool stale = false;
-  if (current_time - npr_data->updated > NPR_STALE_TIMEOUT) {
-    stale = true;
-  }
 
   // APP_LOG(APP_LOG_LEVEL_DEBUG, "ct:%i wup:%i, stale:%i", 
   //   (int)current_time, (int)npr_data->updated, (int)NPR_STALE_TIMEOUT);
@@ -153,8 +178,6 @@ void npr_layer_update(NprData *npr_data)
       }
     }
   } else {
-
-    NprLayerData *nld = layer_get_data(npr_layer);
 
     text_layer_set_text(nld->primary_frequency_layer, npr_data->primary_frequency);
     text_layer_set_text(nld->primary_call_layer, npr_data->primary_call);
@@ -181,6 +204,8 @@ void npr_layer_update(NprData *npr_data)
 void npr_layer_destroy() 
 {
   NprLayerData *nld = layer_get_data(npr_layer);
+
+  layer_destroy(nld->loading_layer);
 
   text_layer_destroy(nld->primary_frequency_layer);
   text_layer_destroy(nld->primary_band_layer);

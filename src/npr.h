@@ -2,7 +2,8 @@
 #define NPR_LAYER_H
 
 typedef struct {
-	TextLayer *primary_frequency_layer;
+	Layer     *loading_layer;
+    TextLayer *primary_frequency_layer;
 	TextLayer *primary_band_layer;
 	TextLayer *primary_call_layer;
     Layer     *primary_strength_layer;
