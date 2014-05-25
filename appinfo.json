@@ -1,7 +1,7 @@
 {
   "uuid": "7b52d760-6799-4c37-8d7a-37d718e6abbc",
-  "shortName": "npr-station-locator",
-  "longName": "npr-station-locator",
+  "shortName": "NPR Station Locator",
+  "longName": "NPR Station Locator",
   "companyName": "Jared Biehler",
   "versionCode": 1,
   "versionLabel": "1.0.0",
@@ -25,6 +25,12 @@
     "zip": 12
   },
   "resources": {
-    "media": []
+    "media": [
+      {
+        "type": "png",
+        "name": "ICON_ERROR",
+        "file": "images/phone-error.png"
+      }
+    ]
   }
 }

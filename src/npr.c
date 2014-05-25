@@ -38,7 +38,13 @@ void npr_animate(void *context)
     animation_step = (animation_step % 3) + 1;
     layer_mark_dirty(nld->loading_layer);
     npr_animation_timer = app_timer_register(NPR_ANIMATION_REFRESH, npr_animate, npr_data);
+
   } 
+  else if (npr_data->error != ERROR_OK) {
+    animation_step = 0;
+    layer_set_hidden(nld->loading_layer, true);
+    layer_set_hidden(bitmap_layer_get_layer(nld->error_icon_layer), false);
+  }
 }
 
 static void draw_signal_strength(GContext *ctx, int strength)
@@ -133,6 +139,13 @@ void npr_layer_create(GRect frame, Window *window)
   text_layer_set_text_alignment(nld->secondary_program_layer, GTextAlignmentRight);
   layer_add_child(npr_layer, text_layer_get_layer(nld->secondary_program_layer));
 
+  nld->error_icon = gbitmap_create_with_resource(RESOURCE_ID_ICON_ERROR);
+  nld->error_icon_layer = bitmap_layer_create(GRect(47, 42, 50, 50));
+
+  layer_add_child(npr_layer, bitmap_layer_get_layer(nld->error_icon_layer));
+  layer_set_hidden(bitmap_layer_get_layer(nld->error_icon_layer), true);
+  bitmap_layer_set_bitmap(nld->error_icon_layer, nld->error_icon);
+
   layer_add_child(window_get_root_layer(window), npr_layer);
 }
 
@@ -177,7 +190,10 @@ void npr_layer_update(NprData *npr_data)
           break;
       }
     }
-  } else {
+  } 
+  else {
+
+    layer_set_hidden(bitmap_layer_get_layer(nld->error_icon_layer), true);
 
     text_layer_set_text(nld->primary_frequency_layer, npr_data->primary_frequency);
     text_layer_set_text(nld->primary_call_layer, npr_data->primary_call);
@@ -218,6 +234,9 @@ void npr_layer_destroy()
   text_layer_destroy(nld->secondary_call_layer);
   layer_destroy(nld->secondary_strength_layer);
   text_layer_destroy(nld->secondary_program_layer);
+
+  bitmap_layer_destroy(nld->error_icon_layer);
+  gbitmap_destroy(nld->error_icon);
 
   layer_destroy(npr_layer);
 }

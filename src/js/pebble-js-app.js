@@ -2,6 +2,7 @@ var Global = {
   apiKey:            '',
   configurationUrl:  'http://jaredbiehler.github.io/NPR-Station-Finder/config/',
   updateInProgress:  false,
+  debugEnabled:      false,
   updateWaitTimeout: 2 * 60 * 1000, // two minutes in ms
   lastUpdateAttempt: new Date(),
   maxRetry:          3,
@@ -10,6 +11,18 @@ var Global = {
     zip: ''
   }
 };
+
+// Allow console messages to be turned on / off 
+(function(){
+    var original = console.log;
+    var logMessage = function (message) {
+        if (Global.debugEnabled) {
+          original.apply(console, arguments);
+        }  
+    };
+    console.log  = logMessage;
+    console.warn = logMessage;
+})();
 
 var ack  = function () { console.log("Pebble ACK sendAppMessage");};
 var nack = function (data, retry) {
@@ -75,7 +88,7 @@ var fetchNprDataViaZip = function() {
       var stationsFound = 0
         , stationsData  = {};
 
-      for (var i = 0; i < response.length; i++) {
+      for (var i=0; i < response.length; i++) {
 
         var stationData = {
           call:      response[i].call,
@@ -120,7 +133,7 @@ var fetchNprDataViaGPS = function(latitude, longitude) {
 
   var url   = 'http://api.npr.org/stations?lat='+latitude+'&lon='+longitude+'&apiKey='+Global.apiKey+'&format=json';
 
-  console.log('URL: ' + url);
+  //console.log('URL: ' + url);
 
   getJson(url, function(err, response) {
 
@@ -182,7 +195,7 @@ var fetchStationStreams = function(guid, isPrimary) {
 
   var url = 'http://api.npr.org/v2/stations/'+guid+'/streams?apiKey='+Global.apiKey;
 
-  console.log('URL: ' + url);
+  //console.log('URL: ' + url);
 
   getJson(url, function(err, response) {
 
@@ -215,7 +228,7 @@ var fetchStreamProgram = function (guid, isPrimary) {
 
   var url = 'http://api.npr.org/v2/streams/'+guid+'/times/now/episodes?apiKey='+Global.apiKey;
 
-  console.log('URL: ' + url);
+  //console.log('URL: ' + url);
 
   getJson(url, function(err, response) {
 

@@ -3,6 +3,10 @@
 
 typedef struct {
 	Layer     *loading_layer;
+    
+    BitmapLayer  *error_icon_layer;
+    GBitmap *error_icon;
+
     TextLayer *primary_frequency_layer;
 	TextLayer *primary_band_layer;
 	TextLayer *primary_call_layer;

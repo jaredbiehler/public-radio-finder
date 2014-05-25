@@ -35,9 +35,7 @@ static void appmsg_in_received(DictionaryIterator *received, void *context) {
 
   // look to see if this was a npr data update first
   if (primary_call_tuple) {
-
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "IN: Pri Call Tuple.");
-
+    
     strncpy(npr_data->primary_call,  primary_call_tuple->value->cstring, 5);
     strncpy(npr_data->primary_frequency,  primary_frequency_tuple->value->cstring, 6);
     strncpy(npr_data->primary_band,  primary_band_tuple->value->cstring, 3);
