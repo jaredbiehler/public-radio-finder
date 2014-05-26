@@ -1,6 +1,8 @@
 
-Public Radio Station Finder (Pebble SDK 2)
+Public Radio Finder (Pebble SDK 2)
 =================================
+
+![banner image](https://raw.githubusercontent.com/jaredbiehler/NPR-Station-Finder/master/screenshots/banner.png)
 
 A Pebble watchface app for displaying local NPR Stations and their currently playing content.
 
