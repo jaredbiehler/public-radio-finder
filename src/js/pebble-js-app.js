@@ -1,6 +1,6 @@
 var Global = {
   apiKey:            '',
-  configurationUrl:  'http://jaredbiehler.github.io/NPR-Station-Finder/config/',
+  configurationUrl:  'http://jaredbiehler.github.io/public-radio-finder/config/',
   updateInProgress:  false,
   debugEnabled:      false,
   updateWaitTimeout: 2 * 60 * 1000, // two minutes in ms
